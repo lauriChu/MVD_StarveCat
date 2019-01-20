@@ -1,2 +1,2 @@
-# MVD_Stealth
-First Level of Stealth Game
+# MVD_StarveCat
+First Level of StarveCat
