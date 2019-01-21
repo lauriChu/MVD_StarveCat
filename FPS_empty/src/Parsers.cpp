@@ -10,7 +10,7 @@ void split(std::string to_split, std::string delim, std::vector<std::string>& re
 	size_t last_offset = 0;
 	while (true) {
 		//find first delim
-		size_t offset = to_split.find_first_of(delim, last_offset);
+		size_t offset = to_split.find_first_of(delim, last_offset); 
 		result.push_back(to_split.substr(last_offset, offset - last_offset));
 		if (offset == std::string::npos) // if at end of string
 			break;
@@ -21,7 +21,7 @@ void split(std::string to_split, std::string delim, std::vector<std::string>& re
 
 //parses a wavefront object into passed arrays
 bool Parsers::parseOBJ(std::string filename, std::vector<float>& vertices, std::vector<float>& uvs, std::vector<float>& normals, std::vector<unsigned int>& indices) {
-
+    
 	std::string line;
 	std::ifstream file(filename);
 	if (file.is_open())
@@ -39,35 +39,32 @@ bool Parsers::parseOBJ(std::string filename, std::vector<float>& vertices, std::
 		while (std::getline(file, line))
 		{
 			//split line string
-			std::vector<std::string> words;
+			std::vector<std::string> words; 
 			split(line, " ", words);
-
+						
 			if (words.empty()) continue; //empty line, skip
 			if (words[0][0] == '#')	continue; //first word starts with #, line is a comment
 
 			if (words[0] == "v") { //line contains vertex data
 				//read words to floats
-				int word_count = 1;
-				if (words[1] == "") word_count++;
-
-				lm::vec3 pos((float)atof(words[word_count++].c_str()),
-					(float)atof(words[word_count++].c_str()),
-					(float)atof(words[word_count++].c_str()));
+				lm::vec3 pos( (float)atof( words[1].c_str() ), 
+							  (float)atof( words[2].c_str() ),
+							  (float)atof( words[3].c_str() ) );
 				//add to temporary vector of positions
 				temp_vertices.push_back(pos);
 			}
 			if (words[0] == "vt") { //line contains texture data
 				//read words to floats
-				lm::vec2 tex((float)atof(words[1].c_str()),
-					(float)atof(words[2].c_str()));
+				lm::vec2 tex( (float)atof(words[1].c_str() ),
+							  (float)atof(words[2].c_str() ) );
 				//add to temporary vector of texture coords
 				temp_uvs.push_back(tex);
 			}
 			if (words[0] == "vn") { //line contains vertex data
 				//read words to floats
-				lm::vec3 norm((float)atof(words[1].c_str()),
-					(float)atof(words[2].c_str()),
-					(float)atof(words[3].c_str()));
+				lm::vec3 norm( (float)atof(words[1].c_str() ),
+							   (float)atof(words[2].c_str() ),
+							   (float)atof(words[3].c_str() ) );
 				//add to temporary vector of normals
 				temp_normals.push_back(norm);
 			}
@@ -82,11 +79,9 @@ bool Parsers::parseOBJ(std::string filename, std::vector<float>& vertices, std::
 				//for each face vertex
 				for (int i = 1; i < words.size(); i++) {
 
-					if (words[i] == "")
-						continue;
 					//check if face vertex has already been indexed
 					if (indices_map.count(words[i]) == 0) {
-
+					
 						//if not, start by getting all indices
 						nums.clear();
 						split(words[i], "/", nums);
@@ -101,7 +96,7 @@ bool Parsers::parseOBJ(std::string filename, std::vector<float>& vertices, std::
 							uvs.push_back(temp_uvs[t_ind].value_[j]);
 						for (int j = 0; j < 3; j++)
 							normals.push_back(temp_normals[n_ind].value_[j]);
-
+						
 						//add an index to final array
 						indices.push_back(next_index);
 
@@ -123,7 +118,7 @@ bool Parsers::parseOBJ(std::string filename, std::vector<float>& vertices, std::
 					//If the face is a quads (i.e. words.size() == 5), we need to create two triangles
 					//out of the quad. We have already created one triangle with words[1], [2] and [3]
 					//now we make another with [4], [1] and [3]. 
-					if (i == 4) {
+					if (i == 4 ) { 
 						//face-vertex 4 is already added, so we search for indices of 1 and 3 and add them
 						int index_1 = indices_map.at(words[1]);
 						indices.push_back(index_1);
@@ -265,13 +260,13 @@ TGAInfo* Parsers::loadTGA(std::string filename)
 }
 
 bool Parsers::parseJSONLevel(std::string filename,
-	GraphicsSystem& graphics_system) {
-	//read json file and stream it into a rapidjson document
-	//see http://rapidjson.org/md_doc_stream.html
-	std::ifstream json_file(filename);
-	rapidjson::IStreamWrapper json_stream(json_file);
-	rapidjson::Document json;
-	json.ParseStream(json_stream);
+                             GraphicsSystem& graphics_system) {
+    //read json file and stream it into a rapidjson document
+    //see http://rapidjson.org/md_doc_stream.html
+    std::ifstream json_file(filename);
+    rapidjson::IStreamWrapper json_stream(json_file);
+    rapidjson::Document json;
+    json.ParseStream(json_stream);
 	//check if its valid JSON
 	if (json.HasParseError()) std::cerr << "JSON format is not valid!" << std::endl;
 	//check if its a valid scene file
@@ -283,8 +278,8 @@ bool Parsers::parseJSONLevel(std::string filename,
 	if (!json.HasMember("entities")) { std::cerr << "JSON file is incomplete! Needs entry: entities" << std::endl; return false; }
 	if (!json.HasMember("shaders")) { std::cerr << "JSON file is incomplete! Needs entry: shaders" << std::endl; return false; }
 
-
-	printf("Parsing Scene Name = %s\n", json["scene"].GetString());
+    
+    printf("Parsing Scene Name = %s\n", json["scene"].GetString());
 
 	std::string data_dir = json["directory"].GetString();
 
@@ -375,19 +370,19 @@ bool Parsers::parseJSONLevel(std::string filename,
 
 	//entities
 	for (rapidjson::SizeType i = 0; i < json["entities"].Size(); i++) {
-
+		
 		//json for entity
 		auto& json_ent = json["entities"][i];
 
 		//get name
 		std::string json_name = "";
-		if (json_ent.HasMember("name"))
+		if (json_ent.HasMember("name")) 
 			json_name = json_ent["name"].GetString();
 
 		//get geometry and material ids - obligatory fields
 		std::string json_geometry = json_ent["geometry"].GetString();
 		std::string json_material = json_ent["material"].GetString();
-
+		
 		//transform - obligatory field
 		auto jt = json_ent["transform"]["translate"].GetArray();
 		auto jr = json_ent["transform"]["rotate"].GetArray();
@@ -401,7 +396,7 @@ bool Parsers::parseJSONLevel(std::string filename,
 
 		//transform
 		auto& ent_transform = ECS.getComponentFromEntity<Transform>(ent_id);
-
+		
 		//rotate
 		//get rotation euler angles
 		lm::vec3 rotate; rotate.x = jr[0].GetFloat(); rotate.y = jr[1].GetFloat(); rotate.z = jr[2].GetFloat();
@@ -453,7 +448,7 @@ bool Parsers::parseJSONLevel(std::string filename,
 		int parent_entity_id = ECS.getEntity(relationship.second);
 		Entity& parent = ECS.entities[parent_entity_id];
 		int parent_transform_id = parent.components[0]; //transform component is always in slot 0
-
+		
 		//get child transform
 		Transform& transform_child = ECS.getComponentFromEntity<Transform>(relationship.first);
 
@@ -461,5 +456,6 @@ bool Parsers::parseJSONLevel(std::string filename,
 		transform_child.parent = parent_transform_id;
 	}
 
-	return true;
+    return true;
 }
+

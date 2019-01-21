@@ -31,9 +31,9 @@ void GraphicsSystem::updateMainViewport(int window_width, int window_height) {
 
 void GraphicsSystem::update(float dt) {
     
-    //set initial OpenGL state
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+	//set initial OpenGL state
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	//update cameras
 	auto& cameras = ECS.getAllComponents<Camera>();
 	for (auto &cam : cameras) cam.update();

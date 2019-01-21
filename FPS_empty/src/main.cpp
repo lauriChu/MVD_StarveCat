@@ -21,6 +21,11 @@ bool glCheckError() {
     return true;
 }
 
+void print(lm::vec3 v) { std::cout << v.x << ", " << v.y << ", " << v.z << "\n"; }
+void print(std::string s) { std::cout << s << "\n"; }
+void print(float f) { std::cout << f << "\n"; }
+void print(int i) { std::cout << i << "\n"; }
+
 void glfw_error_callback(int error, const char* description) {
     std::cerr << "GLFW ERROR: code " << error << "; msg: " << description << std::endl;
 }
@@ -51,6 +56,7 @@ int main(void)
     
     //create window pointer
     GLFWwindow* window;
+	int w_width = 800; int w_height = 600;
     
     // Initialize the library
     if (!glfwInit())
@@ -60,9 +66,12 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+#endif 
     
     // Create a windowed mode window and its OpenGL context
-    window = glfwCreateWindow(800, 600, "Hello OpenGL!", NULL, NULL);
+    window = glfwCreateWindow(w_width, w_height, "Hello OpenGL!", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -85,8 +94,25 @@ int main(void)
     glfwSetKeyCallback(window, key_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+
+	// Setup Platform/Renderer bindings
+	const char* glsl_version = "#version 330";
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
+
+	// Setup Style
+	ImGui::StyleColorsDark();
+
+
     //variables storing mouse position
     double mouse_x, mouse_y;
     
@@ -95,8 +121,8 @@ int main(void)
 
 	//create game singleton and initialise it
 	GAME = new Game();
+	GAME->update_viewports(w_width, w_height);
 	GAME->init();
-	GAME->update_viewports(800, 600);
 	//stores difference in time between each frame
 	float dt = 0.0f;
 	double curr_time = 0.0, prev_time = glfwGetTime();
@@ -133,6 +159,11 @@ int main(void)
 
 	//free game memory - not necessary but good practice!
 	delete GAME;
+
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
     //terminate glfw and exit
     glfwTerminate();

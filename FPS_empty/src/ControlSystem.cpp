@@ -31,16 +31,6 @@ void ControlSystem::update(float dt) {
 	else {
 		updateFree(dt);
 	}
-
-	//check if switch to Debug cam
-	if (input[GLFW_KEY_O] == true) {
-		ECS.main_camera = 0; //debug cam is 0
-		control_type = ControlTypeFree;
-	}
-	if (input[GLFW_KEY_P] == true) {
-		ECS.main_camera = 1;
-		control_type = ControlTypeFPS;
-	}
 }
 
 //update an entity with a free movement control component 
@@ -83,10 +73,24 @@ void ControlSystem::updateFree(float dt) {
 
 
 void ControlSystem::updateFPS(float dt) {
-
-	//get camera and transform
 	Camera& camera = ECS.getComponentInArray<Camera>(ECS.main_camera);
 	Transform& transform = ECS.getComponentFromEntity<Transform>(camera.owner);
+
+	//multiply speeds by delta time 
+	float move_speed_dt = move_speed_ * dt;
+	float turn_speed_dt = turn_speed_ * dt;
+
+	if (input[GLFW_MOUSE_BUTTON_LEFT]) {
+		//rotate camera just like Free movement
+		lm::mat4 R_yaw, R_pitch;
+		//yaw - axis is up vector of world
+		R_yaw.makeRotationMatrix(mouse.delta_x * turn_speed_dt, lm::vec3(0, 1, 0));
+		camera.forward = R_yaw * camera.forward;
+		//pitch - axis is strafe vector of camera i.e cross product of cam_forward and up
+		lm::vec3 pitch_axis = camera.forward.normalize().cross(lm::vec3(0, 1, 0));
+		R_pitch.makeRotationMatrix(mouse.delta_y * turn_speed_dt, pitch_axis);
+		camera.forward = R_pitch * camera.forward;
+	}
 
 	//fps control should have five ray colliders assigned
 	auto& colliders = ECS.getAllComponents<Collider>();
@@ -96,84 +100,90 @@ void ControlSystem::updateFPS(float dt) {
 	Collider& collider_right = colliders[FPS_collider_right];
 	Collider& collider_back = colliders[FPS_collider_back];
 
-	//*** notes: 
-	// - FPS_height is a variable storing the ideal heigh we want to be above ground
-	// - collider_down.collision_point gives you the current point (in world coords) of down collider ray
-	// - look at ControlSystem.h for other useful variables involved in jumping etc.
-
-	// translatte player to height above ground
-	lm::vec3 ground_below_player = collider_down.collision_point;
-	float distance_to_ground = collider_down.collision_distance;
-	//std::cout << distance_to_ground << "\n";
-
-	lm::vec3 trans_pos = transform.position();
-	//below ground
-	if (distance_to_ground < FPS_height) {
-		transform.position(trans_pos.x, ground_below_player.y + FPS_height, trans_pos.z);
-		//guaranteed to be on ground
+	//collisions and gravity
+	//player down ray is always colliding, we need to keep player at 'FPS_height' units above nearest collider
+	float dist_above_ground = (transform.position() - collider_down.collision_point).length();
+	//collision test # 1
+	if (collider_down.colliding && dist_above_ground < FPS_height + 0.01f) // if below or on ground
+	{
+		//say we can jump
 		FPS_can_jump = true;
+		//force player to correct height above ground
+		transform.position(transform.position().x, collider_down.collision_point.y + FPS_height, transform.position().z);
 	}
-	//we're in the air
-	else {
-		if (FPS_jump_force) {
-			FPS_jump_force -= FPS_jump_force_slowdown * dt;
+	else { // we are in the air
+		if (FPS_jump_force > 0.0) {// slow down jump with time
+			FPS_jump_force -= FPS_jump_force_slowdown*dt;
 		}
-		transform.translate(0, (FPS_jump_force - FPS_gravity) * dt, 0);
+		else {// clamp force to 0 if it is already below
+			FPS_jump_force = 0;
+		}
 
-		//second collision test
-		if (collider_down.colliding && distance_to_ground < FPS_height + 0.01) 
+		//move player according to jump force and gravity
+		transform.translate(0.0f, (FPS_jump_force - FPS_gravity)*dt, 0.0f);
 
-		transform.position(trans_pos.x, ground_below_player.y + FPS_height, trans_pos.z);
+		//Collision test #2, as we might have moved down since test #1
+		dist_above_ground = (transform.position() - collider_down.collision_point).length();
+		if (collider_down.colliding && dist_above_ground < FPS_height + 0.01f) // if below or on ground
+		{
+			//force player to correct height
+			transform.position(transform.position().x, collider_down.collision_point.y + FPS_height, transform.position().z);
+		}
 	}
-	//above ground
-	/*if (distance_to_ground > FPS_height) {
-		transform.translate(0, -FPS_gravity  * dt, 0);
-	}*/
 
+	//jump
 	if (FPS_can_jump && input[GLFW_KEY_SPACE] == true) {
+
+		//set jump state to false cos we don't want to double/multiple jump
 		FPS_can_jump = false;
+
+		//add force to jump upwards
 		FPS_jump_force = FPS_jump_initial_force;
 
-		transform.translate(0, FPS_jump_force * dt, 0);
+		//start jump
+		transform.translate(0.0f, FPS_jump_force*dt, 0.0f);
 	}
 
-
-	//old code below
-
-	//multiply speeds by delta time 
-	float move_speed_dt = move_speed_ * dt;
-	float turn_speed_dt = turn_speed_ * dt;
-
-	//rotate camera if clicking the mouse - update camera.forward
-	if (input[GLFW_MOUSE_BUTTON_LEFT]) {
-		lm::mat4 R_yaw, R_pitch;
-
-		//yaw - axis is up vector of world
-		R_yaw.makeRotationMatrix(mouse.delta_x * turn_speed_dt, lm::vec3(0, 1, 0));
-		camera.forward = R_yaw * camera.forward;
-
-		//pitch - axis is strafe vector of camera i.e cross product of cam_forward and up
-		lm::vec3 pitch_axis = camera.forward.normalize().cross(lm::vec3(0, 1, 0));
-		R_pitch.makeRotationMatrix(mouse.delta_y * turn_speed_dt, pitch_axis);
-		camera.forward = R_pitch * camera.forward;
-
-		//rotate camera transform (for FPS colliders)
-		transform.rotateLocal(mouse.delta_x * turn_speed_dt, lm::vec3(0, 1, 0));
-	}
-
+	//forward and strafe 
 	lm::vec3 forward_dir = camera.forward.normalize() * move_speed_dt;
-	forward_dir.y = 0;
 	lm::vec3 strafe_dir = camera.forward.cross(lm::vec3(0, 1, 0)) * move_speed_dt;
-	strafe_dir.y = 0;
+	//nerf y components because we can't fly in an FPS
+	forward_dir.y = 0.0;
+	strafe_dir.y = 0.0;
+	//now move
+	if (input[GLFW_KEY_W] == true && !collider_forward.colliding)
+		transform.translate(forward_dir);
+	if (input[GLFW_KEY_S] == true && !collider_back.colliding)
+		transform.translate(forward_dir * -1.0f);
+	if (input[GLFW_KEY_A] == true && !collider_left.colliding)
+		transform.translate(strafe_dir * -1.0f);
+	if (input[GLFW_KEY_D] == true && !collider_right.colliding)
+		transform.translate(strafe_dir);
 
-	if (input[GLFW_KEY_W] == true && !collider_forward.colliding)	transform.translate(forward_dir);
-	if (input[GLFW_KEY_S] == true && !collider_back.colliding)	transform.translate(forward_dir * -1);
-	if (input[GLFW_KEY_A] == true && !collider_left.colliding) 	transform.translate(strafe_dir*-1);
-	if (input[GLFW_KEY_D] == true && !collider_right.colliding) 	transform.translate(strafe_dir);
+	//user dead -> reinit level
+	// Get Cat collider box + transform
+	int ent_cat_collider = ECS.getEntity("Box Cat");
+	Collider& collider = ECS.getComponentFromEntity<Collider>(ent_cat_collider);
+	int ent_cat = ECS.getEntity("cat");
+	Transform& trans_cat = ECS.getComponentFromEntity<Transform>(ent_cat);
+	// Calc direction between camera and cat
+	lm::vec3 direction = camera.position - trans_cat.position();
+	float distance = sqrt(direction.dot(direction));
+	
+	// Player dead
+	if (distance <= 2.5)
+	{
+		camera.position = lm::vec3(0.0f, 20.0f, 45.0f);
+		transform.position(lm::vec3(0.0f, 20.0f, 45.0f));
+	}
+	// Player playing xD
+	else {
+		//update camera position
+		camera.position = transform.position();
+	}
 
-	//update camera position
-	camera.position = transform.position();
-
-
+	//check if switch to Debug cam
+	//if (input[GLFW_KEY_O] == true) ECS.main_camera = 0; //debug cam is 0
+	//if (input[GLFW_KEY_P] == true) ECS.main_camera = 1;
 }
 

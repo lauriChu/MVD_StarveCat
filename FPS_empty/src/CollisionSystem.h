@@ -3,7 +3,7 @@
 #include "Components.h"
 
 struct Collision {
-    Collider* other;
+    int other;
     lm::vec3 point;
 };
 

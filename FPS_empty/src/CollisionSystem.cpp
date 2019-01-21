@@ -42,9 +42,9 @@ void CollisionSystem::update(float dt) {
                                             col_distance, //reference to collision distance
                                             colliders[i].collision_distance)){ //only look as far as current nearest collider
                         colliders[i].colliding = colliders[j].colliding = true;
-						colliders[i].other = j; colliders[j].other = i;
                         colliders[i].collision_point = colliders[j].collision_point = col_point;
                         colliders[i].collision_distance = colliders[j].collision_distance = col_distance;
+						colliders[i].other = (int)j; colliders[j].other = (int)i;
                     }
                 }
             }

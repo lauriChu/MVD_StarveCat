@@ -1,5 +1,5 @@
 {
-  "scene": "test 1",
+  "scene": "level_1_cat",
   "directory": "data/assets/",
   "geometries": [
     {
@@ -19,75 +19,381 @@
       "file": "cat.obj"
     },
     {
-      "name": "pyramid",
-      "file": "17002_ceremonial_platform_with_altar_v1.obj"
+      "name": "apple",
+      "file": "Manzana.obj"
+    },
+    {
+      "name": "sphere",
+      "file": "sphere.obj"
     }
   ],
   "textures": [
-    {"name": "blue", "file": "block_blue.tga"},
-    {"name": "purple", "file": "block_purple.tga"},
-    {"name": "teal", "file": "block_teal.tga"}
+    {
+      "name": "blue",
+      "file": "block_blue.tga"
+    },
+    {
+      "name": "purple",
+      "file": "block_purple.tga"
+    },
+    {
+      "name": "teal",
+      "file": "block_teal.tga"
+    },
+    {
+      "name": "cat",
+      "file": "cat_diff.tga"
+    },
+    {
+      "name": "white",
+      "file": "white.tga"
+    },
+    {
+      "name": "apple",
+      "file": "Apple.tga"
+    },
+    {
+      "name": "manzana",
+      "file": "manazana.tga"
+    },
+    {
+      "name": "grass",
+      "file": "grass.tga"
+    }
   ],
   "shaders": [
     {"name": "phong", "vertex": "data/shaders/phong.vert", "fragment": "data/shaders/phong.frag"}
   ],
   "materials": [
-    {"name": "blue", "shader": "phong", "diffuse_texture":"blue"},
-    {"name": "purple", "shader": "phong", "diffuse_texture":"purple"},
-    {"name": "teal", "shader": "phong", "diffuse_texture":"teal"}
+    {
+      "name": "blue",
+      "shader": "phong",
+      "diffuse_texture": "blue"
+    },
+    {
+      "name": "purple",
+      "shader": "phong",
+      "diffuse_texture": "purple"
+    },
+    {
+      "name": "teal",
+      "shader": "phong",
+      "diffuse_texture": "teal"
+    },
+    {
+      "name": "apple",
+      "shader": "phong",
+      "diffuse_texture": "apple"
+    },
+    {
+      "name": "manzana",
+      "shader": "phong",
+      "diffuse_texture": "manzana"
+    },
+    {
+      "name": "grass",
+      "shader": "phong",
+      "diffuse_texture": "grass"
+    },
+    {
+      "name": "cat",
+      "shader": "phong",
+      "diffuse_texture": "cat",
+      "ambient": [ 3.5, 3.5, 3.5 ]
+    }
   ],
   "lights": [
     {
       "name": "Light 1",
-      "position": [-100,100,50],
+      "position": [100,100,-100],
       "color": [1,1,1]
     }
   ],
   "entities": [
     {
-      "name": "cat_1",
-      "geometry": "cat",
+      "name": "crate_center",
+      "geometry": "crate",
       "material": "purple",
       "transform": {
-        "translate": [ 0, 2, 0 ],
+        "translate": [ 0, 1.2, 0 ],
         "rotate": [ 0, 0, 0 ],
-        "scale": [ 1, 1, 1 ]
-      }
-    },
-    {
-      "name": "platform_1",
-      "geometry": "pyramid",
-      "material": "blue",
-      "transform": {
-        "translate": [ 0, 0, 0 ],
-        "rotate": [ 0, 0, 0 ],
-        "scale": [ 0.002, 0.002, 0.002 ]
+        "scale": [ 10, 3, 3 ]
       },
       "collider": {
         "type": "Box",
         "center": [ 0, 0, 0 ],
-        "halfwidth": [ 20, 0.5, 20 ]
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
       }
     },
     {
-      "name": "platform_2",
-      "geometry": "pyramid",
-      "material": "blue",
+      "name": "crate0",
+      "geometry": "crate",
+      "material": "purple",
       "transform": {
-        "translate": [ 0, 0, 0 ],
+        "translate": [ -15, 1.2, 10 ],
         "rotate": [ 0, 0, 0 ],
-        "scale": [ 0.002, 0.002, 0.002 ]
+        "scale": [ 8, 3, 3 ]
       },
       "collider": {
         "type": "Box",
         "center": [ 0, 0, 0 ],
-        "halfwidth": [ 20, 0.5, 20 ]
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate1",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 0, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate2",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 3.6, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate3",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 7.2, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate4",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 10.8, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate5",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 14.4, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate6",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 18.0, 1.2, 10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate_bottom_left",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ -12, 1.2, -10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 12, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "crate_bottom_right",
+      "geometry": "crate",
+      "material": "purple",
+      "transform": {
+        "translate": [ 12, 1.2, -10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 12, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "door",
+      "geometry": "crate",
+      "material": "blue",
+      "transform": {
+        "translate": [ 0, 3, -10 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 8, 3, 3 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "button",
+      "geometry": "crate",
+      "material": "blue",
+      "transform": {
+        "translate": [ 15, 1.2, -5 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 4, 1, 4 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.6, 0.6, 0.6 ]
+      }
+    },
+    {
+      "name": "cat",
+      "geometry": "cat",
+      "material": "cat",
+      "transform": {
+        "translate": [ 2, 0.5, 0 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 3, 3, 3 ]
+      }
+    },
+    {
+      "name": "target_position_1",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ 14, 0.85, 0 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
+      }
+    },
+    {
+      "name": "target_position_2",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ 10, 0.85, 5 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
+      }
+    },
+    {
+      "name": "target_position_3",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ -10, 0.85, 5 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
+      }
+    },
+    {
+      "name": "target_position_4",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ -14, 0.85, 0 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
+      }
+    },
+    {
+      "name": "target_position_5",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ -10, 0.85, -5 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
+      }
+    },
+    {
+      "name": "target_position_6",
+      "geometry": "sphere",
+      "material": "purple",
+      "transform": {
+        "translate": [ 10, 0.85, -5 ],
+        "rotate": [ 0, 0, 0 ],
+        "scale": [ 0.2, 0.2, 0.2 ]
+      },
+      "collider": {
+        "type": "Box",
+        "center": [ 0, 0, 0 ],
+        "halfwidth": [ 0.5, 0.5, 0.5 ]
       }
     },
     {
       "name": "floor_1",
       "geometry": "plane_40x40",
-      "material": "blue",
+      "material": "grass",
       "transform": {
         "translate": [ 0, 0, 0 ],
         "rotate": [ 0, 0, 0 ],
@@ -102,7 +408,7 @@
     {
       "name": "floor_2",
       "geometry": "plane_40x40",
-      "material": "teal",
+      "material": "grass",
       "transform": {
         "translate": [ 0, 10.066, 56.898 ],
         "rotate": [ 0, 0, 0 ],
@@ -117,24 +423,9 @@
     {
       "name": "ramp_1",
       "geometry": "plane_10x20",
-      "material": "purple",
+      "material": "grass",
       "transform": {
-        "translate": [ 15, 5, 28.529 ],
-        "rotate": [ -30.837, 0, 0 ],
-        "scale": [ 1, 1, 1 ]
-      },
-      "collider": {
-        "type": "Box",
-        "center": [ 0, 0, 0 ],
-        "halfwidth": [ 5, 0.5, 10 ]
-      }
-    },
-    {
-      "name": "ramp_2",
-      "geometry": "plane_10x20",
-      "material": "purple",
-      "transform": {
-        "translate": [ -15, 5, 28.529 ],
+        "translate": [ 0, 5, 28.529 ],
         "rotate": [ -30.837, 0, 0 ],
         "scale": [ 1, 1, 1 ]
       },
@@ -144,6 +435,5 @@
         "halfwidth": [ 5, 0.5, 10 ]
       }
     }
-
   ]
 }

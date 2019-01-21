@@ -29,6 +29,13 @@ void DebugSystem::init() {
     //create texture for light icon
 	icon_light_texture_ = Parsers::parseTexture("data/assets/icon_light.tga");
 	icon_camera_texture_ = Parsers::parseTexture("data/assets/icon_camera.tga");
+
+	//picking collider
+	ent_picking_ray_ = ECS.createEntity("picking_ray");
+	Collider& picking_ray = ECS.createComponentForEntity<Collider>(ent_picking_ray_);
+	picking_ray.collider_type = ColliderTypeRay;
+	picking_ray.direction = lm::vec3(0, 0, -1);
+	picking_ray.max_distance = 0.001f;
 }
 
 //draws debug information or not
@@ -72,7 +79,12 @@ void DebugSystem::update(float dt) {
         if (draw_frustra_) {
             //draw frustra for all cameras
             auto& cameras = ECS.getAllComponents<Camera>();
+			int counter = 0;
             for (auto& cc : cameras) {
+				//don't draw rendering camera frustum
+				if (counter == ECS.main_camera) continue;
+				counter++;
+
                 lm::mat4 cam_iv = cc.view_matrix;
                 cam_iv.inverse();
                 lm::mat4 cam_ip = cc.projection_matrix;
@@ -205,6 +217,154 @@ void DebugSystem::update(float dt) {
         }
     }
     glBindVertexArray(0);
+
+	//imGUI
+	updateimGUI_(dt);
+}
+
+void DebugSystem::updateimGUI_(float dt) {
+
+	if (show_imGUI_)
+	{
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		//Demo window
+		//ImGui::ShowDemoWindow();
+
+		//get input
+		ImGuiIO &io = ImGui::GetIO();
+
+		//if imGUI wants the mouse, don't fire picking ray
+		if (io.WantCaptureMouse)
+			can_fire_picking_ray_ = false;
+		else
+			can_fire_picking_ray_ = true;
+
+		//open window
+		ImGui::SetNextWindowSize(ImVec2(400, 200));
+		ImGui::SetNextWindowBgAlpha(1.0);
+		// Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+		ImGui::Begin("Scene", &show_imGUI_);
+
+		//Tell imGUI to display variables of the camera
+
+		//get camera and its transform
+		Camera& cam = ECS.getComponentInArray<Camera>(ECS.main_camera);
+		Transform& cam_transform = ECS.getComponentFromEntity<Transform>(cam.owner);
+
+		//Create an unfoldable tree node called 'Camera'
+		if (ImGui::TreeNode("Camera")) {
+			//create temporary arrays with position and direction data
+			float cam_pos_array[3] = { cam.position.x, cam.position.y, cam.position.z };
+			float cam_dir_array[3] = { cam.forward.x, cam.forward.y, cam.forward.z };
+
+			//create imGUI components that allow us to change the values when click-dragging
+			ImGui::DragFloat3("Position", cam_pos_array);
+			ImGui::DragFloat3("Direction", cam_dir_array);
+
+			//use values of temporary arrays to set real values (in case user changes)
+			cam.position = lm::vec3(cam_pos_array[0], cam_pos_array[1], cam_pos_array[2]);
+			cam_transform.position(cam.position);
+			cam.forward = lm::vec3(cam_dir_array[0], cam_dir_array[1], cam_dir_array[2]).normalize();
+			ImGui::TreePop();
+		}
+		
+		//start ImGui columns
+		ImGui::Columns(2, "columns");
+
+		// ** LIST TRANSFORMS ** //
+		auto& transforms = ECS.getAllComponents<Transform>();
+		for (auto& trans : transforms) {
+			ECS.entities[trans.owner];
+			std::string ent_name = ECS.entities[trans.owner].name;
+			// const car needed
+			if (ImGui::TreeNode(ent_name.c_str())) {
+				lm::vec3 trans_pos = trans.position();
+				float pos_array[3] = { trans_pos.x, trans_pos.y, trans_pos.z };
+
+				ImGui::DragFloat3("Position", pos_array);
+				trans.position(pos_array[0], pos_array[1], pos_array[2]);
+				ImGui::TreePop();
+			}
+		}
+
+		// TODO: 
+		// - draw each transform using ImGui::TreeNode (see camera example above)
+
+		// Advanced task:
+		// - Create entity hiearchy using the 'TransformNode' class (defined in DebugSystem.h)
+		//   - get all Transform Components and create a array of all TransformNodes
+		//   - parse array, assigning children to relevant transform nodes
+		//   - create new vector of Transform nodes for *only top level nodes*
+		// - Create recursive function to draw all transforms nodes, using hierarchy
+
+
+		//next column
+		ImGui::NextColumn();
+		
+		// ** OBJECT PICKING ** //
+		
+		//now check if we have a collision of the picking ray
+		//if so, we change variable for imgui window
+
+		//get the pick ray first
+		Collider& pick_ray_collider = ECS.getComponentFromEntity<Collider>(ent_picking_ray_);
+
+		//is it colliding? if so, get pitcked, entity, and transform
+		int picked_entity = -1;
+		if (pick_ray_collider.colliding) {
+			//get the other collider and entity
+			Collider& picked_collider = ECS.getComponentInArray<Collider>(pick_ray_collider.other);
+			picked_entity = picked_collider.owner;
+			Transform& picked_transform = ECS.getComponentFromEntity<Transform>(picked_entity);
+			ImGui::Text("Selected entity:");
+			ImGui::TextColored(ImVec4(1, 1, 0, 1), ECS.entities[picked_collider.owner].name.c_str());
+		}
+
+
+		ImGui::End();
+
+		// Rendering
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
+}
+
+// given mouse screen coords, sets the position of the DebugSystem picking ray in the world
+void DebugSystem::setPickingRay(int mouse_x, int mouse_y, int screen_width, int screen_height) {
+	
+	//if we aren't picking e.g. not opened debug window
+	if (!can_fire_picking_ray_) return;
+
+	//get camera, and picking ray
+	Camera& cam = ECS.getComponentInArray<Camera>(ECS.main_camera);
+	Transform& pick_ray_transform = ECS.getComponentFromEntity<Transform>(ent_picking_ray_);
+	Collider& pick_ray_collider = ECS.getComponentFromEntity<Collider>(ent_picking_ray_);
+
+	//TODO:
+	// - convert mouse_x and mouse_y to NDC - get coordinate of mouse coords on near plane
+	float ndc_mouse_x = ((float)mouse_x * screen_width / (float)screen_width) * 2 - 1;
+	float ndc_mouse_y = ((float)(screen_height - mouse_y )/ (float)screen_height) * 2 - 1;
+	float ndc_mouse_z = -1;
+	lm::vec4 ndc = lm::vec4(ndc_mouse_x, ndc_mouse_y, ndc_mouse_z, 1);
+	// - create inverse viewprojection matrix of camera
+	lm::mat4 cam_inverse = cam.view_projection; // as inv_vp for Alun
+	cam_inverse.inverse();
+	// - multiply mouse position on near plane of NDC by inverse vp = world position of mouse
+	lm::vec4 mouse_world = cam_inverse * ndc;
+	//    - inverse viewprojection gives a VECTOR4 in homogenous coordinates, so must normalize!
+	mouse_world.normalize();
+	// - picking ray (pick_ray_transform)
+	pick_ray_transform.position(cam.position.x, cam.position.y, cam.position.z);
+	//   - position = camera position
+	//   - direction = towards mouse position in world coords (don't forget to normalize)
+	lm::vec3 mouse_world3(mouse_world.x, mouse_world.y, mouse_world.z);
+	pick_ray_collider.direction = (mouse_world3 - cam.position).normalize();
+	//   - max distance = big number
+	pick_ray_collider.max_distance = 100000000.0f;
 }
 
 ///////////////////////////////////////////////

@@ -1,14 +1,1 @@
-﻿  CollisionSystem.cpp
-c:\users\laura\desktop\mvd engine programing\06_fps_levels\fps_empty\src\collisionsystem.cpp(45): warning C4267: '=': conversión de 'size_t' a 'int'; posible pérdida de datos
-  DebugSystem.cpp
-  Game.cpp
-  GraphicsSystem.cpp
-  ControlSystem.cpp
-  linmath.cpp
-  main.cpp
-  Parsers.cpp
-  ScriptSystem.cpp
-  Shader.cpp
-  Generando código...
-LINK : warning LNK4098: la biblioteca predeterminada'MSVCRT' entra en conflicto con otras bibliotecas; use la biblioteca /NODEFAULTLIB:biblioteca
-  FPS_empty.vcxproj -> C:\Users\Laura\Desktop\MVD Engine Programing\06_FPS_Levels\FPS_empty\visual_studio\..\FPS_empty.exe
+﻿

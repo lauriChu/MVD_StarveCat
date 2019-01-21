@@ -77,8 +77,10 @@ struct EntityComponentStore {
         const int type_index = type2int<T>::result;
         //get index for component
         const int comp_index = entities[entity_id].components[type_index];
-        //return component from vector in tuple
-        return get<vector<T>>(components)[comp_index];
+		//return component from vector in tuple, if it exists
+		if (comp_index != -1)
+			return get<vector<T>>(components)[comp_index];
+		throw std::out_of_range("Entity does not have component of this type");
     }
 
 	//return reference to component stored in entity, accessed by name
@@ -90,8 +92,34 @@ struct EntityComponentStore {
 		const int type_index = type2int<T>::result;
 		//get index for component
 		const int comp_index = entities[entity_id].components[type_index];
-		//return component from vector in tuple
-		return get<vector<T>>(components)[comp_index];
+		//return component from vector in tuple, if it exists
+		if (comp_index != -1)
+			return get<vector<T>>(components)[comp_index];
+		throw std::out_of_range("Entity does not have component of this type");
+	}
+
+	template<typename T>
+	bool entityHasComponent(int entity_id) {
+		//get index for type
+		const int type_index = type2int<T>::result;
+		//get index for component
+		const int comp_index = entities[entity_id].components[type_index];
+		//if it exists
+		if (comp_index != -1) return true;
+		return false;
+	}
+
+	template<typename T>
+	bool entityHasComponent(std::string entity_name) {
+		//get entity id
+		const int entity_id = getEntity(entity_name);
+		//get index for type
+		const int type_index = type2int<T>::result;
+		//get index for component
+		const int comp_index = entities[entity_id].components[type_index];
+		//if it exists
+		if (comp_index != -1) return true;
+		return false;
 	}
     
     //return id of component in relevant array

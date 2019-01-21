@@ -17,6 +17,8 @@
 #pragma once
 #include "includes.h"
 #include <vector>
+#include <functional>
+
 
 /**** COMPONENTS ****/
 
@@ -133,6 +135,49 @@ struct Collider: public Component {
     
 };
 
+enum GUIAnchor {
+	GUIAnchorTopLeft,
+	GUIAnchorTop,
+	GUIAnchorTopRight,
+	GUIAnchorCenterLeft,
+	GUIAnchorCenter,
+	GUIAnchorCenterRight,
+	GUIAnchorBottomLeft,
+	GUIAnchorBottom,
+	GUIAnchorBottomRight,
+};
+
+struct ScreenBounds {
+	int x_min = 0;
+	int x_max = 0;
+	int y_min = 0;
+	int y_max = 0;
+	bool pointInBounds(int x, int y) {
+		if (x > x_min && x < x_max && y > y_min && y < y_max)
+			return true;
+		return false;
+	}
+};
+
+
+struct GUIElement : public Component {
+	GLuint texture = 0;
+	GLint width = 0;
+	GLint height = 0;
+	GUIAnchor anchor = GUIAnchorCenter;
+	lm::vec2 offset;
+	ScreenBounds screen_bounds;
+	std::function<void()> onClick;
+};
+
+struct GUIText : public GUIElement {
+	std::string text = "";
+	std::string font_face = "";
+	int font_size = 32;
+	lm::vec3 color = lm::vec3(1.0, 1.0, 1.0);
+};
+
+
 /**** COMPONENT STORAGE ****/
 
 //add new component type vectors here to store them in *ECS*
@@ -141,7 +186,10 @@ std::vector<Transform>,
 std::vector<Mesh>,
 std::vector<Camera>,
 std::vector<Light>,
-std::vector<Collider>
+std::vector<Collider>,
+std::vector<GUIElement>,
+std::vector<GUIText>
+
 > ComponentArrays;
 
 //way of mapping different types to an integer value i.e.
@@ -153,8 +201,10 @@ template<> struct type2int<Mesh> { enum { result = 1 }; };
 template<> struct type2int<Camera> { enum { result = 2 }; };
 template<> struct type2int<Light> { enum { result = 3 }; };
 template<> struct type2int<Collider> { enum { result = 4 }; };
+template<> struct type2int<GUIElement> { enum { result = 5 }; };
+template<> struct type2int<GUIText> { enum { result = 6 }; };
 //UPDATE THIS!
-const int NUM_TYPE_COMPONENTS = 5;
+const int NUM_TYPE_COMPONENTS = 7;
 
 /**** ENTITY ****/
 
